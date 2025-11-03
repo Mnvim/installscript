@@ -167,6 +167,13 @@ chmod 750 /.snapshots
 echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' > /etc/sudoers.d/90-snapper
 snapper -c root create -d "Initial installation"
 
+# Habilitar timers automáticos
+systemctl enable snapper-timeline.timer
+systemctl enable snapper-cleanup.timer
+# Si querés activarlos inmediatamente (sin reiniciar):
+systemctl start snapper-timeline.timer
+systemctl start snapper-cleanup.timer
+
 EOF
 
 # sudo systemctl enable --now snapper-timeline.timer

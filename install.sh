@@ -28,8 +28,8 @@ parted --script "$DISK" \
     set 1 esp on \
     mkpart Linux btrfs 2050MiB 100%
 
-ESP="${DISK}p1"
-ROOT="${DISK}p2"
+ESP="${DISK}1"
+ROOT="${DISK}2"
 
 # ========= FORMAT ESP =========
 mkfs.fat -F 32 "$ESP"

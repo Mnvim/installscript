@@ -55,14 +55,14 @@ mount --mkdir -o compress=zstd:1,noatime,subvol=@var_cache /dev/mapper/root /mnt
 mount --mkdir -o compress=zstd:1,noatime,subvol=@snapshots /dev/mapper/root /mnt/.snapshots
 mount --mkdir "$ESP" /mnt/boot
 
+sleep 5
 clear
-sleep 2
 
 # ========= INSTALL BASE SYSTEM =========
 echo "--- Installing base system ---"
-pacman -Sy --noconfirm archlinux-keyring reflector
+pacman -Sy --needed --noconfirm archlinux-keyring reflector
 
-reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+# reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
     limine cryptsetup networkmanager reflector sudo vim intel-ucode \
@@ -71,8 +71,9 @@ pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
+
+sleep 5
 clear
-sleep 2
 
 # ========= CHROOT CONFIGURATION =========
 arch-chroot /mnt /bin/bash -e <<EOF
@@ -130,16 +131,16 @@ timeout: 3
     module_path: boot():/initramfs-linux-fallback.img
 LIMINECONF
 
-clear
-sleep 2
+sleep 4
 
 # --- ENABLE SERVICES ---
 for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth avahi-daemon firewalld acpid reflector.timer; do
     systemctl enable \$s
 done
 
+sleep 3
 clear
-sleep 2
+sleep 5
 
 # --- INSTALL YAY (AUR HELPER) ---
 echo "--- Installing yay-bin ---"
@@ -155,32 +156,32 @@ sudo -u $USERNAME bash -c '
 #    yay -S --noconfirm limine-entry-tool limine-snapper-sync limine-mkinitcpio-hook
 #'
 
-clear
-sleep 2
-
 # --- SNAPPER CONFIGURATION ---
 echo "--- Configuring Snapper for root ---"
 pacman -Sy --noconfirm snapper snap-pac inotify-tools
 
-clear
-sleep 2
+# Crear configuración raíz
+if [ -d /.snapshots ]; then
+    umount /.snapshots 2>/dev/null || true
+    rm -rf /.snapshots
+fi
 
-cd /
-umount /.snapshots
-rm -r /.snapshots/
 snapper -c root create-config /
-mkdir -p .snapshots
+
+# Recrear punto de montaje
+mkdir -p /.snapshots
 mount -a
 chown -R :wheel /.snapshots
 chmod 750 /.snapshots
-systemctl enable snapper-timeline.timer
-systemctl enable snapper-cleanup.timer
-# systemctl enable --now limine-snapper-sync.service
-echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' | tee /etc/sudoers.d/90-snapper
+
+# Configurar sudoers
+echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' > /etc/sudoers.d/90-snapper
+
+# Crear snapshot inicial
 snapper -c root create -d "Initial installation"
 
-# Regenerar initramfs para ejecutar hook de Limine
-# mkinitcpio -P
+# No habilitar timers en chroot (dbus no disponible)
+echo "--- Snapper configured. Enable timers after first boot: ---"
 
 EOF
 

@@ -160,7 +160,7 @@ echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' | tee /etc/sudoers.d/90-snapp
 snapper -c root create --description "Initial installation"
 
 # Regenerar initramfs para ejecutar hook de Limine
-mkinitcpio -P
+# mkinitcpio -P
 
 EOF
 

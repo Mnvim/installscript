@@ -58,10 +58,13 @@ mount --mkdir "$ESP" /mnt/boot
 # ========= INSTALL BASE SYSTEM =========
 echo "--- Installing base system ---"
 pacman -Sy --noconfirm archlinux-keyring
+
+reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+
 pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
     limine cryptsetup networkmanager reflector sudo vim intel-ucode \
     dhcpcd iwd firewalld bluez bluez-utils acpid avahi rsync bash-completion \
-    pipewire pipewire-alsa pipewire-pulse wireplumber sof-firmware
+    pipewire pipewire-alsa pipewire-pulse wireplumber sof-firmware git
 
 genfstab -U /mnt >> /mnt/etc/fstab
 

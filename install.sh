@@ -185,6 +185,10 @@ echo "--- Snapper configured. Enable timers after first boot: ---"
 
 EOF
 
+# sudo systemctl enable --now snapper-timeline.timer
+# sudo systemctl enable --now snapper-cleanup.timer
+
+
 # ========= FINAL CLEANUP =========
 echo "--- Cleaning up ---"
 sync

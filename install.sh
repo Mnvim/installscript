@@ -61,7 +61,7 @@ clear
 echo "--- Installing base system ---"
 pacman -Sy --needed --noconfirm archlinux-keyring reflector
 
-# reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
     limine cryptsetup networkmanager reflector sudo vim intel-ucode \
@@ -155,30 +155,7 @@ sudo -u $USERNAME bash -c '
 #    yay -S --noconfirm limine-entry-tool limine-snapper-sync limine-mkinitcpio-hook
 #'
 
-# --- SNAPPER CONFIGURATION ---
-echo "--- Configuring Snapper for root ---"
-pacman -Sy --noconfirm snapper snap-pac inotify-tools
-
-snapper -c root create-config /
-mkdir -p /.snapshots
-mount -a
-chown -R :wheel /.snapshots
-chmod 750 /.snapshots
-echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' > /etc/sudoers.d/90-snapper
-snapper -c root create -d "Initial installation"
-
-# Habilitar timers automáticos
-systemctl enable snapper-timeline.timer
-systemctl enable snapper-cleanup.timer
-# Si querés activarlos inmediatamente (sin reiniciar):
-systemctl start snapper-timeline.timer
-systemctl start snapper-cleanup.timer
-
 EOF
-
-# sudo systemctl enable --now snapper-timeline.timer
-# sudo systemctl enable --now snapper-cleanup.timer
-
 
 # ========= FINAL CLEANUP =========
 echo "--- Cleaning up ---"

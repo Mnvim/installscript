@@ -140,7 +140,7 @@ sudo -u $USERNAME bash -c '
 '
 # Instalar herramientas desde AUR usando yay
 sudo -u $USERNAME bash -c '
-    yay -S --noconfirm limine-entry-tool limine-snapper-sync limine-mkinitcpio-hook
+    yay -G --noconfirm limine-entry-tool limine-snapper-sync limine-mkinitcpio-hook
 '
 
 # --- SNAPPER CONFIGURATION ---

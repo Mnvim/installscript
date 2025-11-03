@@ -122,7 +122,7 @@ timeout: 3
 LIMINECONF
 
 # --- ENABLE SERVICES ---
-for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth cups avahi-daemon firewalld acpid reflector.timer; do
+for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth avahi-daemon firewalld acpid reflector.timer; do
     systemctl enable \$s
 done
 

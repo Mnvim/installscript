@@ -161,27 +161,27 @@ echo "--- Configuring Snapper for root ---"
 pacman -Sy --noconfirm snapper snap-pac inotify-tools
 
 # Crear configuración raíz
-if [ -d /.snapshots ]; then
-    umount /.snapshots 2>/dev/null || true
-    rm -rf /.snapshots
-fi
+# if [ -d /.snapshots ]; then
+#    umount /.snapshots 2>/dev/null || true
+#    rm -rf /.snapshots
+# fi
 
-snapper -c root create-config /
+# snapper -c root create-config /
 
 # Recrear punto de montaje
-mkdir -p /.snapshots
-mount -a
-chown -R :wheel /.snapshots
-chmod 750 /.snapshots
+# mkdir -p /.snapshots
+# mount -a
+# chown -R :wheel /.snapshots
+# chmod 750 /.snapshots
 
 # Configurar sudoers
-echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' > /etc/sudoers.d/90-snapper
+# echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' > /etc/sudoers.d/90-snapper
 
 # Crear snapshot inicial
-snapper -c root create -d "Initial installation"
+# snapper -c root create -d "Initial installation"
 
 # No habilitar timers en chroot (dbus no disponible)
-echo "--- Snapper configured. Enable timers after first boot: ---"
+# echo "--- Snapper configured. Enable timers after first boot: ---"
 
 EOF
 

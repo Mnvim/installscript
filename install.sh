@@ -57,7 +57,7 @@ mount --mkdir "$ESP" /mnt/boot
 
 # ========= INSTALL BASE SYSTEM =========
 echo "--- Installing base system ---"
-pacman -Sy --noconfirm archlinux-keyring
+pacman -Sy --noconfirm archlinux-keyring reflector
 
 reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
@@ -166,7 +166,9 @@ EOF
 
 # ========= FINAL CLEANUP =========
 echo "--- Cleaning up ---"
-umount -R /mnt
+sync
+sleep 2
+umount -R /mnt || echo "Some mounts could not be unmounted, continuing..."
 cryptsetup close root
 
 echo "=== Installation complete! Reboot now and remove installation media. ==="

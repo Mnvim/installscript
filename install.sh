@@ -126,6 +126,20 @@ for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth a
     systemctl enable \$s
 done
 
+# --- INSTALL YAY (AUR HELPER) ---
+echo "--- Installing yay-bin ---"
+pacman -Sy --noconfirm git base-devel
+sudo -u $USERNAME bash -c '
+    cd /home/$USERNAME
+    git clone https://aur.archlinux.org/yay-bin.git
+    cd yay-bin
+    makepkg -si --noconfirm
+'
+# Instalar herramientas desde AUR usando yay
+sudo -u $USERNAME bash -c '
+    yay -S --noconfirm limine-entry-tool limine-snapper-sync limine-mkinitcpio-hook
+'
+
 # --- SNAPPER CONFIGURATION ---
 echo "--- Configuring Snapper for root ---"
 pacman -Sy --noconfirm snapper snap-pac inotify-tools
@@ -138,9 +152,12 @@ chown -R :wheel /.snapshots
 chmod 750 /.snapshots
 systemctl enable snapper-timeline.timer
 systemctl enable snapper-cleanup.timer
-systemctl enable grub-btrfsd.service
+systemctl enable --now limine-snapper-sync.service
 echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' | tee /etc/sudoers.d/90-snapper
 snapper -c root create --description "Initial installation"
+
+# Regenerar initramfs para ejecutar hook de Limine
+mkinitcpio -P
 
 EOF
 

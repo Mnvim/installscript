@@ -126,6 +126,22 @@ for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth a
     systemctl enable \$s
 done
 
+# --- SNAPPER CONFIGURATION ---
+echo "--- Configuring Snapper for root ---"
+pacman -Sy --noconfirm snapper snap-pac inotify-tools
+snapper --no-dbus -c root create-config /
+rm -rf /.snapshots
+btrfs subvolume delete /.snapshots 2>/dev/null || true
+mkdir -p /.snapshots
+mount -o subvol=@snapshots /dev/mapper/root /.snapshots
+chown -R :wheel /.snapshots
+chmod 750 /.snapshots
+systemctl enable snapper-timeline.timer
+systemctl enable snapper-cleanup.timer
+systemctl enable grub-btrfsd.service
+echo '%wheel ALL=(ALL) NOPASSWD: /usr/bin/snapper' | tee /etc/sudoers.d/90-snapper
+snapper -c root create --description "Initial installation"
+
 EOF
 
 # ========= FINAL CLEANUP =========

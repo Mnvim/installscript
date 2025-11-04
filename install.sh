@@ -42,7 +42,7 @@ echo -n "$LUKS_PASS" | cryptsetup open "$ROOT" root -
 mkfs.btrfs /dev/mapper/root
 mount /dev/mapper/root /mnt
 
-for sub in @ @home @var_log @var_cache; do
+for sub in @ @home @var_log @var_cache @snapshots; do
     btrfs subvolume create "/mnt/$sub"
 done
 
@@ -52,10 +52,8 @@ mount -o compress=zstd:1,noatime,subvol=@ /dev/mapper/root /mnt
 mount --mkdir -o compress=zstd:1,noatime,subvol=@home /dev/mapper/root /mnt/home
 mount --mkdir -o compress=zstd:1,noatime,subvol=@var_log /dev/mapper/root /mnt/var/log
 mount --mkdir -o compress=zstd:1,noatime,subvol=@var_cache /dev/mapper/root /mnt/var/cache
+mount --mkdir -o compress=zstd:1,noatime,subvol=@snapshots /dev/mapper/root /mnt/.snapshots
 mount --mkdir "$ESP" /mnt/boot
-
-sleep 5
-clear
 
 # ========= INSTALL BASE SYSTEM =========
 echo "--- Installing base system ---"
@@ -69,10 +67,6 @@ pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
     pipewire pipewire-alsa pipewire-pulse wireplumber sof-firmware git duf
 
 genfstab -U /mnt >> /mnt/etc/fstab
-
-
-sleep 5
-clear
 
 # ========= CHROOT CONFIGURATION =========
 arch-chroot /mnt /bin/bash -e <<EOF
@@ -130,16 +124,10 @@ timeout: 3
     module_path: boot():/initramfs-linux-fallback.img
 LIMINECONF
 
-sleep 4
-
 # --- ENABLE SERVICES ---
 for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth avahi-daemon firewalld acpid reflector.timer; do
     systemctl enable \$s
 done
-
-sleep 3
-clear
-sleep 5
 
 # --- INSTALL YAY (AUR HELPER) ---
 echo "--- Installing yay-bin ---"

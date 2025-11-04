@@ -59,7 +59,7 @@ mount --mkdir "$ESP" /mnt/boot
 echo "--- Installing base system ---"
 pacman -Sy --needed --noconfirm archlinux-keyring reflector
 
-reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+# reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
     limine cryptsetup networkmanager reflector sudo vim intel-ucode \
@@ -67,6 +67,12 @@ pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs efibootmgr \
     pipewire pipewire-alsa pipewire-pulse wireplumber sof-firmware git duf
 
 genfstab -U /mnt >> /mnt/etc/fstab
+
+
+sleep 5
+echo ""
+echo ""
+echo "CHROOT"
 
 # ========= CHROOT CONFIGURATION =========
 arch-chroot /mnt /bin/bash -e <<EOF
@@ -124,10 +130,15 @@ timeout: 3
     module_path: boot():/initramfs-linux-fallback.img
 LIMINECONF
 
+sleep 4
+
 # --- ENABLE SERVICES ---
 for s in NetworkManager dhcpcd iwd systemd-networkd systemd-resolved bluetooth avahi-daemon firewalld acpid reflector.timer; do
     systemctl enable \$s
 done
+
+sleep 5
+clear
 
 # --- INSTALL YAY (AUR HELPER) ---
 echo "--- Installing yay-bin ---"
@@ -138,10 +149,10 @@ sudo -u $USERNAME bash -c '
     cd yay-bin
     makepkg -si --noconfirm
 '
-# Instalar herramientas desde AUR usando yay
-#sudo -u $USERNAME bash -c '
-#    yay -S --noconfirm limine-entry-tool limine-snapper-sync limine-mkinitcpio-hook
-#'
+# yay -S limine-snapper-sync limine-mkinitcpio-hook
+
+# ---------------- SNAPPER CONFIGURATION ----------------
+pacman -Sy --noconfirm snapper snap-pac inotify-tools
 
 EOF
 
@@ -153,4 +164,3 @@ umount -R /mnt || echo "Some mounts could not be unmounted, continuing..."
 cryptsetup close root
 
 echo "=== Installation complete! Reboot now and remove installation media. ==="
-
